@@ -1,45 +1,74 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Central color & style palette matching the peach/cream fintech design.
+/// Warna utama Moneyf — tema Biru Modern
 class AppColors {
-  static const Color bgTop = Color(0xFFF7ECE3);
-  static const Color bgCard = Color(0xFFF3E7DC);
-  static const Color inputFill = Color(0xFFEFE2D6);
-  static const Color peachStart = Color(0xFFF7C9A8);
-  static const Color peachEnd = Color(0xFFF0A98A);
-  static const Color black = Color(0xFF1B1B1B);
-  static const Color textPrimary = Color(0xFF1E1E1E);
-  static const Color textSecondary = Color(0xFF8B8378);
-  static const Color positive = Color(0xFF2E7D32);
-  static const Color chipYellow = Color(0xFFF6D77A);
-  static const Color chipPurple = Color(0xFFD9C6F0);
-  static const Color chipBlue = Color(0xFFC9DCF0);
+  // Primary Blues
+  static const Color primary = Color(0xFF1565C0);      // biru utama
+  static const Color primaryDark = Color(0xFF0D47A1);  // biru gelap
+  static const Color primaryLight = Color(0xFF42A5F5); // biru muda
+  static const Color primarySurface = Color(0xFFE3F2FD); // bg biru tipis
+
+  // Background
+  static const Color bgScreen = Color(0xFFF0F4FF);
+  static const Color bgCard = Colors.white;
+
+  // Text
+  static const Color textPrimary = Color(0xFF1A1A2E);
+  static const Color textSecondary = Color(0xFF6B7A99);
+  static const Color textWhite = Colors.white;
+
+  // Semantic
+  static const Color positive = Color(0xFF2E7D32);   // hijau income
+  static const Color negative = Color(0xFFD32F2F);   // merah expense
+  static const Color warning = Color(0xFFE65100);    // oranye utang
+
+  // Status badge
+  static const Color badgePaidBg = Color(0xFFE8F5E9);
+  static const Color badgePaidText = Color(0xFF2E7D32);
+  static const Color badgeUnpaidBg = Color(0xFFFFEBEE);
+  static const Color badgeUnpaidText = Color(0xFFD32F2F);
+
+  // Input
+  static const Color inputFill = Color(0xFFF0F4FF);
+  static const Color inputBorder = Color(0xFFD0DAFF);
+
+  // ─── legacy aliases (jaga kompatibilitas) ───
+  static const Color black = Color(0xFF1A1A2E);
+  static const Color bgTop = bgScreen;
+  static const Color peachStart = Color(0xFF42A5F5);
+  static const Color peachEnd = Color(0xFF1565C0);
+  static const Color chipYellow = Color(0xFFFFCC80);
+  static const Color chipPurple = Color(0xFFCE93D8);
+  static const Color chipBlue = Color(0xFF90CAF9);
 }
 
 ThemeData buildAppTheme() {
   final base = ThemeData(
     useMaterial3: true,
     colorScheme: const ColorScheme.light(
-      primary: AppColors.black,
-      secondary: AppColors.peachEnd,
+      primary: AppColors.primary,
+      secondary: AppColors.primaryLight,
     ),
-    scaffoldBackgroundColor: AppColors.bgTop,
+    scaffoldBackgroundColor: AppColors.bgScreen,
   );
   final textTheme = GoogleFonts.plusJakartaSansTextTheme(base.textTheme);
-  return base.copyWith(
-    textTheme: textTheme,
+  return base.copyWith(textTheme: textTheme);
+}
+
+/// Gradient biru untuk header/background atas
+BoxDecoration blueGradientHeader() {
+  return const BoxDecoration(
+    gradient: LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [AppColors.primaryDark, AppColors.primary, Color(0xFF1976D2)],
+    ),
   );
 }
 
 BoxDecoration screenBackground() {
-  return const BoxDecoration(
-    gradient: LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [AppColors.bgTop, Color(0xFFF9F2EC)],
-    ),
-  );
+  return const BoxDecoration(color: AppColors.bgScreen);
 }
 
 class BlackButton extends StatelessWidget {
@@ -55,16 +84,16 @@ class BlackButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.black,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
+            borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
         ),
         child: Text(
           label,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
       ),
     );

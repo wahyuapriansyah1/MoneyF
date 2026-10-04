@@ -27,9 +27,9 @@ class FinanceState extends ChangeNotifier {
         .fold(0.0, (sum, item) => sum + item.amount);
   }
 
-  // Calculate Total Balance (Saldo Utama = Pemasukan - Pengeluaran)
+  // Calculate Total Balance (Total Uang Bersih = Pemasukan - Pengeluaran - Piutang Belum Lunas)
   double get totalBalance {
-    return totalIncome - totalExpense;
+    return totalIncome - totalExpense - totalDebtReceivable;
   }
 
   // Calculate Total Utang Saya (Belum Lunas)

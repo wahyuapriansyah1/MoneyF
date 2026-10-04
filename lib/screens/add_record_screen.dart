@@ -217,27 +217,26 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                 : 'Catat Utang / Piutang');
 
     return Scaffold(
-      body: Container(
-        decoration: screenBackground(),
-        child: SafeArea(
-          child: ResponsiveLayout(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: Column(
-                children: [
-                  _TopBar(
-                    title: pageTitle,
-                    onDelete: _isEditing ? _deleteData : null,
-                  ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Type Selector (Pemasukan, Pengeluaran, Utang)
-                          _TypeSegmentedControl(
+      backgroundColor: AppColors.bgScreen,
+      body: SafeArea(
+        child: ResponsiveLayout(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+            child: Column(
+              children: [
+                _TopBar(
+                  title: pageTitle,
+                  onDelete: _isEditing ? _deleteData : null,
+                ),
+                const SizedBox(height: 20),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Type Selector (Pemasukan, Pengeluaran, Utang)
+                      _TypeSegmentedControl(
                             selectedType: _selectedType,
                             onTypeChanged: (type) {
                               setState(() {
@@ -297,48 +296,48 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Category Picker
-                          const _FieldLabel('Kategori'),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: availableCategories.map((cat) {
-                              final isSelected = cat.name == _selectedCategory.name;
-                              return ChoiceChip(
-                                label: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      cat.icon,
-                                      size: 16,
-                                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                                    ),
-                                    const SizedBox(width: 6),
-                                    Text(cat.name),
-                                  ],
-                                ),
-                                selected: isSelected,
-                                selectedColor: AppColors.black,
-                                backgroundColor: Colors.white,
-                                labelStyle: TextStyle(
+                      // Category Picker
+                      const _FieldLabel('Kategori'),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: availableCategories.map((cat) {
+                          final isSelected = cat.name == _selectedCategory.name;
+                          return ChoiceChip(
+                            label: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  cat.icon,
+                                  size: 16,
                                   color: isSelected ? Colors.white : AppColors.textPrimary,
-                                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                  fontSize: 13,
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: BorderSide(
-                                    color: isSelected ? AppColors.black : Colors.black12,
-                                  ),
-                                ),
-                                onSelected: (_) {
-                                  setState(() {
-                                    _selectedCategory = cat;
-                                  });
-                                },
-                              );
-                            }).toList(),
-                          ),
+                                const SizedBox(width: 6),
+                                Text(cat.name),
+                              ],
+                            ),
+                            selected: isSelected,
+                            selectedColor: AppColors.primary,
+                            backgroundColor: Colors.white,
+                            labelStyle: TextStyle(
+                              color: isSelected ? Colors.white : AppColors.textPrimary,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(
+                                color: isSelected ? AppColors.primary : Colors.black12,
+                              ),
+                            ),
+                            onSelected: (_) {
+                              setState(() {
+                                _selectedCategory = cat;
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
                           const SizedBox(height: 16),
 
                           // Date Picker Row
@@ -392,46 +391,45 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
                             hintText: 'Tambahkan keterangan detail...',
                             prefixIcon: Icons.chat_bubble_outline_rounded,
                           ),
-                          const SizedBox(height: 24),
-                        ],
-                      ),
-                    ),
+                      const SizedBox(height: 24),
+                    ],
                   ),
-                  BlackButton(
-                    label: _isEditing ? 'Simpan Perubahan' : 'Simpan Catatan',
-                    onPressed: _submitData,
-                  ),
-                  if (_isEditing) ...[
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 52,
-                      child: OutlinedButton.icon(
-                        onPressed: _deleteData,
-                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                        label: const Text(
-                          'Hapus Catatan Ini',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.redAccent),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
+                ),
               ),
-            ),
+              BlackButton(
+                label: _isEditing ? 'Simpan Perubahan' : 'Simpan Catatan',
+                onPressed: _submitData,
+              ),
+              if (_isEditing) ...[
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: OutlinedButton.icon(
+                    onPressed: _deleteData,
+                    icon: const Icon(Icons.delete_outline_rounded, color: AppColors.negative, size: 20),
+                    label: const Text(
+                      'Hapus Catatan Ini',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.negative,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: AppColors.negative),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _TopBar extends StatelessWidget {
@@ -449,9 +447,16 @@ class _TopBar extends StatelessWidget {
           child: Container(
             width: 42,
             height: 42,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.06),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Icon(
               Icons.arrow_back_ios_new_rounded,
@@ -465,8 +470,8 @@ class _TopBar extends StatelessWidget {
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
               color: AppColors.textPrimary,
             ),
           ),
@@ -478,14 +483,21 @@ class _TopBar extends StatelessWidget {
             child: Container(
               width: 42,
               height: 42,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: const Icon(
                 Icons.delete_outline_rounded,
                 size: 20,
-                color: Colors.redAccent,
+                color: AppColors.negative,
               ),
             ),
           )
@@ -530,14 +542,21 @@ class _TypeSegmentedControl extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.inputFill,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         children: [
           _buildItem('Pemasukan', RecordType.income, Icons.arrow_downward_rounded, AppColors.positive),
-          _buildItem('Pengeluaran', RecordType.expense, Icons.arrow_upward_rounded, Colors.redAccent),
-          _buildItem('Utang', RecordType.debt, Icons.handshake_rounded, Colors.orangeAccent),
+          _buildItem('Pengeluaran', RecordType.expense, Icons.arrow_upward_rounded, AppColors.negative),
+          _buildItem('Utang', RecordType.debt, Icons.handshake_rounded, AppColors.warning),
         ],
       ),
     );
@@ -552,17 +571,8 @@ class _TypeSegmentedControl extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? Colors.white : Colors.transparent,
+            color: isSelected ? AppColors.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ]
-                : [],
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -570,7 +580,7 @@ class _TypeSegmentedControl extends StatelessWidget {
               Icon(
                 icon,
                 size: 16,
-                color: isSelected ? activeAccent : AppColors.textSecondary,
+                color: isSelected ? Colors.white : AppColors.textSecondary,
               ),
               const SizedBox(width: 4),
               Flexible(
@@ -580,7 +590,7 @@ class _TypeSegmentedControl extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                    color: isSelected ? AppColors.textPrimary : AppColors.textSecondary,
+                    color: isSelected ? Colors.white : AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -611,10 +621,10 @@ class _DebtTypeSelector extends StatelessWidget {
               child: Text('Saya Berutang (Utang)'),
             ),
             selected: selectedDebtType == DebtType.payable,
-            selectedColor: AppColors.peachStart,
+            selectedColor: AppColors.primary,
             backgroundColor: Colors.white,
             labelStyle: TextStyle(
-              color: AppColors.textPrimary,
+              color: selectedDebtType == DebtType.payable ? Colors.white : AppColors.textPrimary,
               fontWeight: selectedDebtType == DebtType.payable ? FontWeight.w700 : FontWeight.w500,
               fontSize: 12,
             ),
@@ -622,7 +632,7 @@ class _DebtTypeSelector extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: selectedDebtType == DebtType.payable ? AppColors.peachEnd : Colors.black12,
+                color: selectedDebtType == DebtType.payable ? AppColors.primary : Colors.black12,
               ),
             ),
           ),
@@ -634,10 +644,10 @@ class _DebtTypeSelector extends StatelessWidget {
               child: Text('Orang Berutang (Piutang)'),
             ),
             selected: selectedDebtType == DebtType.receivable,
-            selectedColor: AppColors.chipBlue,
+            selectedColor: AppColors.primary,
             backgroundColor: Colors.white,
             labelStyle: TextStyle(
-              color: AppColors.textPrimary,
+              color: selectedDebtType == DebtType.receivable ? Colors.white : AppColors.textPrimary,
               fontWeight: selectedDebtType == DebtType.receivable ? FontWeight.w700 : FontWeight.w500,
               fontSize: 12,
             ),
@@ -645,7 +655,7 @@ class _DebtTypeSelector extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
               side: BorderSide(
-                color: selectedDebtType == DebtType.receivable ? AppColors.black : Colors.black12,
+                color: selectedDebtType == DebtType.receivable ? AppColors.primary : Colors.black12,
               ),
             ),
           ),

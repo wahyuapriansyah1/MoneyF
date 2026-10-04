@@ -9,45 +9,52 @@ class MoneyBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: AppColors.primary.withValues(alpha: 0.12),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _NavItem(
-            icon: Icons.home_rounded,
-            label: 'Beranda',
-            selected: currentIndex == 0,
-            onTap: () => onTap?.call(0),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.home_rounded,
+              label: 'Beranda',
+              selected: currentIndex == 0,
+              onTap: () => onTap?.call(0),
+            ),
           ),
-          _NavItem(
-            icon: Icons.bar_chart_rounded,
-            label: 'Analisis',
-            selected: currentIndex == 1,
-            onTap: () => onTap?.call(1),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.bar_chart_rounded,
+              label: 'Analisa',
+              selected: currentIndex == 1,
+              onTap: () => onTap?.call(1),
+            ),
           ),
-          _CenterFab(onTap: () => onTap?.call(4)), // FAB Add Quick Action
-          _NavItem(
-            icon: Icons.handshake_rounded,
-            label: 'Utang',
-            selected: currentIndex == 2,
-            onTap: () => onTap?.call(2),
+          _CenterFab(onTap: () => onTap?.call(4)),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.account_balance_wallet_rounded,
+              label: 'Utang/Piutang',
+              selected: currentIndex == 2,
+              onTap: () => onTap?.call(2),
+            ),
           ),
-          _NavItem(
-            icon: Icons.settings_rounded,
-            label: 'Pengaturan',
-            selected: currentIndex == 3,
-            onTap: () => onTap?.call(3),
+          Expanded(
+            child: _NavItem(
+              icon: Icons.settings_rounded,
+              label: 'Pengaturan',
+              selected: currentIndex == 3,
+              onTap: () => onTap?.call(3),
+            ),
           ),
         ],
       ),
@@ -69,21 +76,25 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.black : AppColors.textSecondary;
+    final color = selected ? AppColors.primary : AppColors.textSecondary;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, color: color, size: 22),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 10,
                 color: color,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),
@@ -101,17 +112,27 @@ class _CenterFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      customBorder: const CircleBorder(),
       child: Container(
-        width: 48,
-        height: 48,
-        decoration: const BoxDecoration(
-          color: AppColors.black,
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [AppColors.primary, AppColors.primaryDark],
+          ),
           shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        child: const Icon(Icons.add_rounded, color: Colors.white, size: 26),
+        child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
       ),
     );
   }

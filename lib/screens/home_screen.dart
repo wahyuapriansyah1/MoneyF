@@ -14,240 +14,362 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _transactionFilter = 0; // 0: Semua, 1: Pemasukan, 2: Pengeluaran, 3: Utang
+  bool _balanceVisible = true;
+
+  String _formatIndonesianDate(DateTime dt) {
+    const days = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+    return '${days[dt.weekday - 1]}, ${dt.day} ${months[dt.month - 1]} ${dt.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = FinanceProvider.of(context);
-
-    final filteredRecords = state.records.where((r) {
-      if (_transactionFilter == 1) return r.type == RecordType.income;
-      if (_transactionFilter == 2) return r.type == RecordType.expense;
-      if (_transactionFilter == 3) return r.type == RecordType.debt;
-      return true;
-    }).toList();
+    final now = DateTime.now();
 
     return Material(
       color: Colors.transparent,
       child: Container(
-        decoration: screenBackground(),
-        child: SafeArea(
-          bottom: false,
-          child: ResponsiveLayout(
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-              children: [
-                const _Header(),
-                const SizedBox(height: 20),
-
-                // Main Balance Section
-                _BalanceSection(state: state),
-                const SizedBox(height: 16),
-
-                // Quick Financial Metrics Breakdown (Pemasukan, Pengeluaran, Utang)
-                _MetricsRow(state: state, onNavigateTab: widget.onNavigateTab),
-                const SizedBox(height: 16),
-
-                // Quick Action Buttons
-                _QuickActionsRow(
-                  onAddIncome: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const AddRecordScreen(initialType: RecordType.income),
-                      ),
-                    );
-                  },
-                  onAddExpense: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const AddRecordScreen(initialType: RecordType.expense),
-                      ),
-                    );
-                  },
-                  onAddDebt: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const AddRecordScreen(initialType: RecordType.debt),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                // Recent Transactions Header & Filter
-                _TransactionsHeader(
-                  selectedFilter: _transactionFilter,
-                  onFilterChanged: (filterIndex) {
-                    setState(() {
-                      _transactionFilter = filterIndex;
-                    });
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // Transaction Items List Card
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 16,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: filteredRecords.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 32),
-                          child: Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.receipt_long_outlined,
-                                  size: 40,
-                                  color: AppColors.textSecondary,
+        color: AppColors.bgScreen,
+        child: Column(
+          children: [
+            // ── Header biru ──────────────────────────────
+            Container(
+              decoration: blueGradientHeader(),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Greeting row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Text(
+                                    'Halo, Wahan ',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const Text('👋', style: TextStyle(fontSize: 18)),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Semoga hari ini penuh dengan hal baik!',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.white.withValues(alpha: 0.8),
                                 ),
-                                SizedBox(height: 8),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.notifications_none_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Balance Card
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
                                 Text(
-                                  'Belum ada transaksi di kategori ini',
+                                  'Total Uang Bersih',
                                   style: TextStyle(
                                     fontSize: 13,
+                                    color: Colors.white.withValues(alpha: 0.85),
                                     fontWeight: FontWeight.w500,
-                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                GestureDetector(
+                                  onTap: () => setState(() => _balanceVisible = !_balanceVisible),
+                                  child: Icon(
+                                    _balanceVisible
+                                        ? Icons.visibility_outlined
+                                        : Icons.visibility_off_outlined,
+                                    size: 16,
+                                    color: Colors.white.withValues(alpha: 0.7),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        )
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: EdgeInsets.zero,
-                          itemCount: filteredRecords.length,
-                          separatorBuilder: (_, __) => Divider(
-                            height: 1,
-                            thickness: 0.8,
-                            color: Colors.black.withValues(alpha: 0.05),
-                          ),
-                          itemBuilder: (context, index) {
-                            return _TransactionTile(item: filteredRecords[index]);
-                          },
+                            const SizedBox(height: 6),
+                            _balanceVisible
+                                ? FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      state.formatCurrency(state.totalBalance),
+                                      style: const TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.white,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    '••••••••',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                    ),
+                                  ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF69FF47),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'Terupdate real-time',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white.withValues(alpha: 0.75),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Quick action buttons row
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _QuickActionChip(
+                              icon: Icons.remove_circle_outline_rounded,
+                              label: 'Pengeluaran',
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const AddRecordScreen(
+                                    initialType: RecordType.expense,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _QuickActionChip(
+                              icon: Icons.add_circle_outline_rounded,
+                              label: 'Pemasukan',
+                              onTap: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const AddRecordScreen(
+                                    initialType: RecordType.income,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _QuickActionChip(
+                              icon: Icons.account_balance_wallet_outlined,
+                              label: 'Utang/Piutang',
+                              onTap: () => widget.onNavigateTab?.call(2),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ],
+              ),
             ),
-          ),
+
+            // ── Body ──────────────────────────────────────
+            Expanded(
+              child: ResponsiveLayout(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+                  children: [
+                    // Metric Cards
+                    _MetricsRow(state: state),
+                    const SizedBox(height: 20),
+
+                    // Transaksi Terbaru
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Transaksi Terbaru',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text(
+                            'Lihat Semua >',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Transaction list
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: state.records.isEmpty
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 32),
+                              child: Center(
+                                child: Text(
+                                  'Belum ada transaksi',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : ListView.separated(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              itemCount: state.records.length > 5
+                                  ? 5
+                                  : state.records.length,
+                              separatorBuilder: (_, __) => Divider(
+                                height: 1,
+                                indent: 72,
+                                endIndent: 16,
+                                color: Colors.grey.shade100,
+                              ),
+                              itemBuilder: (context, index) {
+                                return _TransactionTile(
+                                  item: state.records[index],
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _Header extends StatefulWidget {
-  const _Header();
+class _QuickActionChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
 
-  @override
-  State<_Header> createState() => _HeaderState();
-}
-
-class _HeaderState extends State<_Header> {
-  String _formatIndonesianDate(DateTime dt) {
-    const days = [
-      'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'
-    ];
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
-
-    final dayName = days[dt.weekday - 1];
-    final monthName = months[dt.month - 1];
-
-    return '$dayName, ${dt.day} $monthName ${dt.year}';
-  }
+  const _QuickActionChip({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Selamat Datang',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
         ),
-        const SizedBox(height: 2),
-        Text(
-          _formatIndonesianDate(now),
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-            letterSpacing: -0.2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _BalanceSection extends StatelessWidget {
-  final FinanceState state;
-  const _BalanceSection({required this.state});
-
-  @override
-  Widget build(BuildContext context) {
-    final now = DateTime.now();
-    final dateStr = '${now.day} ${_monthName(now.month)} ${now.year}';
-
-    return Column(
-      children: [
-        const Text(
-          'Total Saldo Bersih',
-          style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 4),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            state.formatCurrency(state.totalBalance),
-            style: const TextStyle(
-              fontSize: 34,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: Colors.white, size: 20),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          'Hari ini $dateStr',
-          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-        ),
-      ],
+      ),
     );
-  }
-
-  String _monthName(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-    return months[month - 1];
   }
 }
 
 class _MetricsRow extends StatelessWidget {
   final FinanceState state;
-  final ValueChanged<int>? onNavigateTab;
-
-  const _MetricsRow({required this.state, this.onNavigateTab});
+  const _MetricsRow({required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -255,34 +377,31 @@ class _MetricsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _MetricCard(
-            title: 'Pemasukan',
-            amount: state.formatCurrency(state.totalIncome),
-            icon: Icons.south_west_rounded,
-            accentColor: AppColors.positive,
-            bgColor: Colors.white,
+            title: 'Pengeluaran',
+            amount: state.formatCurrency(state.totalExpense),
+            icon: Icons.arrow_upward_rounded,
+            iconColor: AppColors.negative,
+            iconBg: const Color(0xFFFFEBEE),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: _MetricCard(
-            title: 'Pengeluaran',
-            amount: state.formatCurrency(state.totalExpense),
-            icon: Icons.north_east_rounded,
-            accentColor: Colors.redAccent,
-            bgColor: Colors.white,
+            title: 'Pemasukan',
+            amount: state.formatCurrency(state.totalIncome),
+            icon: Icons.arrow_downward_rounded,
+            iconColor: AppColors.positive,
+            iconBg: const Color(0xFFE8F5E9),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
-          child: GestureDetector(
-            onTap: () => onNavigateTab?.call(2), // Navigate to Debt Tab
-            child: _MetricCard(
-              title: 'Utang/Piutang',
-              amount: state.formatCurrency(state.totalDebtPayable),
-              icon: Icons.handshake_rounded,
-              accentColor: Colors.orangeAccent,
-              bgColor: AppColors.chipYellow.withValues(alpha: 0.4),
-            ),
+          child: _MetricCard(
+            title: 'Utang/Piutang',
+            amount: state.formatCurrency(state.totalDebtPayable),
+            icon: Icons.account_balance_wallet_rounded,
+            iconColor: AppColors.warning,
+            iconBg: const Color(0xFFFFF3E0),
           ),
         ),
       ],
@@ -294,55 +413,54 @@ class _MetricCard extends StatelessWidget {
   final String title;
   final String amount;
   final IconData icon;
-  final Color accentColor;
-  final Color bgColor;
+  final Color iconColor;
+  final Color iconBg;
 
   const _MetricCard({
     required this.title,
     required this.amount,
     required this.icon,
-    required this.accentColor,
-    required this.bgColor,
+    required this.iconColor,
+    required this.iconBg,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(18),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, size: 14, color: accentColor),
-              const SizedBox(width: 4),
-              Expanded(
-                child: Text(
-                  title,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ],
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+            child: Icon(icon, size: 16, color: iconColor),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 10,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 2),
           FittedBox(
             fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
             child: Text(
               amount,
               style: const TextStyle(
@@ -358,192 +476,6 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
-class _QuickActionsRow extends StatelessWidget {
-  final VoidCallback onAddIncome;
-  final VoidCallback onAddExpense;
-  final VoidCallback onAddDebt;
-
-  const _QuickActionsRow({
-    required this.onAddIncome,
-    required this.onAddExpense,
-    required this.onAddDebt,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        _ActionButton(
-          icon: Icons.add_circle_outline_rounded,
-          label: 'Pemasukan',
-          color: AppColors.positive,
-          onTap: onAddIncome,
-        ),
-        _ActionButton(
-          icon: Icons.remove_circle_outline_rounded,
-          label: 'Pengeluaran',
-          color: Colors.redAccent,
-          onTap: onAddExpense,
-        ),
-        _ActionButton(
-          icon: Icons.handshake_outlined,
-          label: 'Utang/Piutang',
-          color: Colors.deepOrange,
-          onTap: onAddDebt,
-        ),
-      ],
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TransactionsHeader extends StatelessWidget {
-  final int selectedFilter;
-  final ValueChanged<int> onFilterChanged;
-
-  const _TransactionsHeader({
-    required this.selectedFilter,
-    required this.onFilterChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: const [
-            Text(
-              'Riwayat Transaksi',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: [
-              _FilterChip(
-                label: 'Semua',
-                isSelected: selectedFilter == 0,
-                onTap: () => onFilterChanged(0),
-              ),
-              const SizedBox(width: 6),
-              _FilterChip(
-                label: 'Pemasukan',
-                isSelected: selectedFilter == 1,
-                onTap: () => onFilterChanged(1),
-              ),
-              const SizedBox(width: 6),
-              _FilterChip(
-                label: 'Pengeluaran',
-                isSelected: selectedFilter == 2,
-                onTap: () => onFilterChanged(2),
-              ),
-              const SizedBox(width: 6),
-              _FilterChip(
-                label: 'Utang / Piutang',
-                isSelected: selectedFilter == 3,
-                onTap: () => onFilterChanged(3),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.black : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _TransactionTile extends StatelessWidget {
   final FinancialRecord item;
   const _TransactionTile({required this.item});
@@ -553,137 +485,85 @@ class _TransactionTile extends StatelessWidget {
     final state = FinanceProvider.of(context);
     final isIncome = item.type == RecordType.income;
     final isDebt = item.type == RecordType.debt;
-    final sign = isIncome ? '+' : (isDebt ? '' : '-');
 
-    Color iconBg = AppColors.inputFill;
-    IconData icon = item.categoryIcon;
-    Color amountColor = AppColors.textPrimary;
+    Color iconBg;
+    Color amountColor;
+    String sign;
 
     if (isIncome) {
+      iconBg = const Color(0xFFE8F5E9);
       amountColor = AppColors.positive;
-    } else if (item.type == RecordType.expense) {
-      amountColor = Colors.redAccent;
+      sign = '+ ';
+    } else if (isDebt) {
+      iconBg = const Color(0xFFFFF3E0);
+      amountColor = AppColors.warning;
+      sign = '';
     } else {
-      amountColor = item.debtType == DebtType.payable ? Colors.deepOrange : Colors.blueAccent;
+      iconBg = const Color(0xFFFFEBEE);
+      amountColor = AppColors.negative;
+      sign = '- ';
     }
 
-    final dateStr = '${item.date.day}/${item.date.month}/${item.date.year}';
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+    final dateStr =
+        '${item.date.day} ${months[item.date.month - 1]} ${item.date.year}';
+    final typeLabel = isIncome
+        ? 'Pemasukan'
+        : isDebt
+            ? (item.debtType == DebtType.payable ? 'Utang' : 'Piutang')
+            : 'Pengeluaran';
 
-    return Dismissible(
-      key: Key(item.id),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: Colors.red.shade400,
-          borderRadius: BorderRadius.circular(16),
+    return InkWell(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => AddRecordScreen(recordToEdit: item),
         ),
-        child: const Icon(Icons.delete_rounded, color: Colors.white),
       ),
-      onDismissed: (_) {
-        state.deleteRecord(item.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Transaksi "${item.title}" dihapus')),
-        );
-      },
-      child: InkWell(
-        onTap: () {
-          // Edit Record
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => AddRecordScreen(recordToEdit: item),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              child: Icon(item.categoryIcon, size: 20, color: amountColor),
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: iconBg,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            item.category,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '• $dateStr',
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '$sign${state.formatCurrency(item.amount)}',
-                    style: TextStyle(
-                      fontSize: 13,
+                    item.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      color: amountColor,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  if (isDebt)
-                    Text(
-                      item.isPaid ? 'LUNAS' : 'BELUM LUNAS',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: item.isPaid ? Colors.green : Colors.redAccent,
-                      ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '$dateStr · $typeLabel',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textSecondary,
                     ),
+                  ),
                 ],
               ),
-              const SizedBox(width: 6),
-              const Icon(Icons.edit_outlined, size: 16, color: AppColors.textSecondary),
-            ],
-          ),
+            ),
+            Text(
+              '$sign${state.formatCurrency(item.amount)}',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: amountColor,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -73,7 +73,7 @@ void main() {
 
     // Tab 0: HomeScreen
     print('Testing Tab 0: HomeScreen');
-    expect(find.text('Total Saldo Bersih'), findsOneWidget);
+    expect(find.text('Total Uang Bersih'), findsOneWidget);
 
     // Tab 1: AnalyticsScreen
     print('Testing Tab 1: AnalyticsScreen');
