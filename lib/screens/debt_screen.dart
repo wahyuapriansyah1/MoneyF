@@ -6,7 +6,14 @@ import '../widgets/responsive_layout.dart';
 import 'add_record_screen.dart';
 
 class DebtScreen extends StatefulWidget {
-  const DebtScreen({super.key});
+  final VoidCallback? onBack;
+  final ValueChanged<int>? onNavigateTab;
+
+  const DebtScreen({
+    super.key,
+    this.onBack,
+    this.onNavigateTab,
+  });
 
   @override
   State<DebtScreen> createState() => _DebtScreenState();
@@ -27,6 +34,16 @@ class _DebtScreenState extends State<DebtScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _handleBack() {
+    if (widget.onBack != null) {
+      widget.onBack!();
+    } else if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else if (widget.onNavigateTab != null) {
+      widget.onNavigateTab!(0);
+    }
   }
 
   @override
@@ -50,23 +67,38 @@ class _DebtScreenState extends State<DebtScreen>
               children: [
                 // Header
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  padding: const EdgeInsets.fromLTRB(16, 16, 20, 0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Utang / Piutang',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
+                      IconButton(
+                        onPressed: _handleBack,
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 20,
                           color: AppColors.textPrimary,
+                        ),
+                        splashRadius: 20,
+                        tooltip: 'Kembali',
+                      ),
+                      const SizedBox(width: 4),
+                      const Expanded(
+                        child: Text(
+                          'Utang / Piutang',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
                       ),
                       FilledButton.icon(
                         onPressed: () => Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const AddRecordScreen(
+                            builder: (_) => AddRecordScreen(
                               initialType: RecordType.debt,
+                              initialDebtType: _tabController.index == 0
+                                  ? DebtType.payable
+                                  : DebtType.receivable,
                             ),
                           ),
                         ),
@@ -376,6 +408,8 @@ class _DebtTile extends StatelessWidget {
               children: [
                 Text(
                   item.personName ?? item.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -385,6 +419,8 @@ class _DebtTile extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   dateStr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 11,
                     color: AppColors.textSecondary,
@@ -393,15 +429,20 @@ class _DebtTile extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                state.formatCurrency(item.amount),
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: amountColor,
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: Text(
+                  state.formatCurrency(item.amount),
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: amountColor,
+                  ),
                 ),
               ),
               const SizedBox(height: 4),

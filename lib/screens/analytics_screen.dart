@@ -4,6 +4,7 @@ import '../theme.dart';
 import '../models.dart';
 import '../state/finance_state.dart';
 import '../widgets/responsive_layout.dart';
+import 'all_transactions_screen.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -14,6 +15,52 @@ class AnalyticsScreen extends StatefulWidget {
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int _tabIndex = 0; // 0: Pengeluaran, 1: Pemasukan
+  int _selectedYear = DateTime.now().year;
+  int? _selectedMonth = DateTime.now().month; // null = Semua Bulan (Tahunan)
+
+  static const List<String> _monthNames = [
+    'Januari',
+    'Februari',
+    'Maret',
+    'April',
+    'Mei',
+    'Juni',
+    'Juli',
+    'Agustus',
+    'September',
+    'Oktober',
+    'November',
+    'Desember'
+  ];
+
+  static const List<String> _shortMonthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'Mei',
+    'Jun',
+    'Jul',
+    'Agu',
+    'Sep',
+    'Okt',
+    'Nov',
+    'Des'
+  ];
+
+  String get _filterLabel {
+    if (_selectedMonth == null) {
+      return 'Tahun $_selectedYear >';
+    }
+    return '${_monthNames[_selectedMonth! - 1]} $_selectedYear >';
+  }
+
+  String get _periodSubtitle {
+    if (_selectedMonth == null) {
+      return 'Tahun $_selectedYear';
+    }
+    return '${_monthNames[_selectedMonth! - 1]} $_selectedYear';
+  }
 
   static const List<Color> _pieColors = [
     Color(0xFF1565C0),
@@ -25,13 +72,283 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     Color(0xFF1976D2),
   ];
 
+  void _openPeriodFilterSheet(BuildContext context) {
+    int tempYear = _selectedYear;
+    int? tempMonth = _selectedMonth;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            return Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Pilih Periode Analisa',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setModalState(() {
+                              tempYear = DateTime.now().year;
+                              tempMonth = DateTime.now().month;
+                            });
+                          },
+                          child: const Text(
+                            'Bulan Ini',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Selector Tahun
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.bgScreen,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(
+                              Icons.chevron_left_rounded,
+                              color: AppColors.textPrimary,
+                            ),
+                            onPressed: () {
+                              setModalState(() => tempYear--);
+                            },
+                          ),
+                          Text(
+                            '$tempYear',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.chevron_right_rounded,
+                              color: AppColors.textPrimary,
+                            ),
+                            onPressed: () {
+                              setModalState(() => tempYear++);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Opsi Filter Tahunan (Semua Bulan)
+                    GestureDetector(
+                      onTap: () {
+                        setModalState(() => tempMonth = null);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: tempMonth == null
+                              ? AppColors.primarySurface
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: tempMonth == null
+                                ? AppColors.primary
+                                : Colors.grey.shade300,
+                            width: tempMonth == null ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              tempMonth == null
+                                  ? Icons.radio_button_checked_rounded
+                                  : Icons.radio_button_off_rounded,
+                              size: 20,
+                              color: tempMonth == null
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Sepanjang Tahun $tempYear (Tahunan)',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: tempMonth == null
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
+                                  color: tempMonth == null
+                                      ? AppColors.primary
+                                      : AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Opsi Filter Bulanan (12 Bulan)
+                    const Text(
+                      'Pilih Bulan Spesifik:',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 2.2,
+                      ),
+                      itemCount: 12,
+                      itemBuilder: (ctx, idx) {
+                        final monthNum = idx + 1;
+                        final isSelected = tempMonth == monthNum;
+                        return GestureDetector(
+                          onTap: () {
+                            setModalState(() => tempMonth = monthNum);
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.bgScreen,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : Colors.transparent,
+                              ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              _shortMonthNames[idx],
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Tombol Terapkan
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectedYear = tempYear;
+                          _selectedMonth = tempMonth;
+                        });
+                        Navigator.of(ctx).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Terapkan Filter',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = FinanceProvider.of(context);
 
-    final records = _tabIndex == 0
-        ? state.records.where((r) => r.type == RecordType.expense).toList()
-        : state.records.where((r) => r.type == RecordType.income).toList();
+    // Filter transaksi berdasarkan tab (pemasukan/pengeluaran), tahun, dan bulan
+    final records = state.records.where((r) {
+      if (r.type !=
+          (_tabIndex == 0 ? RecordType.expense : RecordType.income)) {
+        return false;
+      }
+      if (r.date.year != _selectedYear) {
+        return false;
+      }
+      if (_selectedMonth != null && r.date.month != _selectedMonth) {
+        return false;
+      }
+      return true;
+    }).toList();
 
     final total = records.fold<double>(0, (s, r) => s + r.amount);
 
@@ -42,11 +359,32 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     final sortedEntries = categorySums.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    final now = DateTime.now();
-    const months = [
-      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
+    // Perhitungan pembanding periode sebelumnya
+    double prevTotal = 0.0;
+    if (_selectedMonth != null) {
+      final prevYear =
+          _selectedMonth == 1 ? _selectedYear - 1 : _selectedYear;
+      final prevMonth = _selectedMonth == 1 ? 12 : _selectedMonth! - 1;
+      prevTotal = state.records
+          .where((r) =>
+              r.type ==
+                  (_tabIndex == 0 ? RecordType.expense : RecordType.income) &&
+              r.date.year == prevYear &&
+              r.date.month == prevMonth)
+          .fold<double>(0.0, (s, r) => s + r.amount);
+    } else {
+      prevTotal = state.records
+          .where((r) =>
+              r.type ==
+                  (_tabIndex == 0 ? RecordType.expense : RecordType.income) &&
+              r.date.year == _selectedYear - 1)
+          .fold<double>(0.0, (s, r) => s + r.amount);
+    }
+    final hasPrev = prevTotal > 0;
+    final diff = total - prevTotal;
+    final pctDiff =
+        hasPrev ? (diff.abs() / prevTotal * 100).toStringAsFixed(0) : '0';
+    final isIncrease = diff > 0;
 
     return Material(
       color: Colors.transparent,
@@ -58,7 +396,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
               children: [
-                // Title
+                // Title & Filter Button
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -70,29 +408,44 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         color: AppColors.textPrimary,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.calendar_month_rounded,
-                              size: 14, color: AppColors.primary),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${months[now.month - 1]} ${now.year} >',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
+                    GestureDetector(
+                      onTap: () => _openPeriodFilterSheet(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.grey.shade200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.calendar_month_rounded,
+                              size: 14,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _filterLabel,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -147,29 +500,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Ringkasan',
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          Text(
-                            '${months[now.month - 1]} ${now.year} >',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      const Text(
+                        'Ringkasan',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                       Text(
-                        'Total ${_tabIndex == 0 ? 'Pengeluaran' : 'Pemasukan'}',
+                        'Total ${_tabIndex == 0 ? 'Pengeluaran' : 'Pemasukan'} ($_periodSubtitle)',
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
@@ -185,14 +525,28 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         ),
                       ),
                       const SizedBox(height: 2),
-                      Text(
-                        '↓ 12% dari bulan lalu',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.green.shade600,
-                          fontWeight: FontWeight.w600,
+                      if (hasPrev)
+                        Text(
+                          isIncrease
+                              ? '↑ $pctDiff% dari periode sebelumnya'
+                              : '↓ $pctDiff% dari periode sebelumnya',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: (_tabIndex == 0 ? !isIncrease : isIncrease)
+                                ? Colors.green.shade600
+                                : Colors.red.shade600,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      else
+                        Text(
+                          'Periode: $_periodSubtitle',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 20),
 
                       // Pie chart
@@ -303,7 +657,17 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       ),
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => AllTransactionsScreen(
+                              initialFilter: _tabIndex == 0
+                                  ? RecordType.expense
+                                  : RecordType.income,
+                            ),
+                          ),
+                        );
+                      },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
                         minimumSize: Size.zero,

@@ -317,7 +317,10 @@ class _MainTabScreenState extends State<MainTabScreen> {
     final screens = [
       HomeScreen(onNavigateTab: _onTabTapped),
       const AnalyticsScreen(),
-      const DebtScreen(),
+      DebtScreen(
+        onBack: () => _onTabTapped(0),
+        onNavigateTab: _onTabTapped,
+      ),
       const SettingsScreen(),
     ];
 

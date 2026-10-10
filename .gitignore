@@ -49,3 +49,9 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+
+# Obsidian Vault Junction
+docs/
+
+# AI Agent rules (local only)
+AGENTS.md

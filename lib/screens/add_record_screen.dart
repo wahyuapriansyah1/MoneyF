@@ -7,11 +7,13 @@ import '../widgets/responsive_layout.dart';
 
 class AddRecordScreen extends StatefulWidget {
   final RecordType initialType;
+  final DebtType? initialDebtType;
   final FinancialRecord? recordToEdit;
 
   const AddRecordScreen({
     super.key,
     this.initialType = RecordType.expense,
+    this.initialDebtType,
     this.recordToEdit,
   });
 
@@ -56,6 +58,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
       }
     } else {
       _selectedType = widget.initialType;
+      _debtType = widget.initialDebtType ?? DebtType.payable;
       _titleController = TextEditingController();
       _amountController = TextEditingController();
       _personController = TextEditingController();
@@ -130,8 +133,14 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
   }
 
   void _submitData() {
-    final title = _titleController.text.trim();
+    var title = _titleController.text.trim();
     final rawText = _amountController.text.trim();
+    final person = _personController.text.trim();
+
+    // Jika transaksi Utang/Piutang dan judul kosong tapi nama orang terisi, buatkan judul otomatis
+    if (title.isEmpty && _selectedType == RecordType.debt && person.isNotEmpty) {
+      title = _debtType == DebtType.payable ? 'Utang ke $person' : 'Piutang $person';
+    }
     
     // Clean amount text from dots and non-digit characters
     final digitsOnly = rawText.replaceAll(RegExp(r'\D'), '');
@@ -618,7 +627,7 @@ class _DebtTypeSelector extends StatelessWidget {
         Expanded(
           child: ChoiceChip(
             label: const Center(
-              child: Text('Saya Berutang (Utang)'),
+              child: Text('Saya Berutang'),
             ),
             selected: selectedDebtType == DebtType.payable,
             selectedColor: AppColors.primary,
@@ -626,7 +635,7 @@ class _DebtTypeSelector extends StatelessWidget {
             labelStyle: TextStyle(
               color: selectedDebtType == DebtType.payable ? Colors.white : AppColors.textPrimary,
               fontWeight: selectedDebtType == DebtType.payable ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 12,
+              fontSize: 13,
             ),
             onSelected: (_) => onChanged(DebtType.payable),
             shape: RoundedRectangleBorder(
@@ -641,7 +650,7 @@ class _DebtTypeSelector extends StatelessWidget {
         Expanded(
           child: ChoiceChip(
             label: const Center(
-              child: Text('Orang Berutang (Piutang)'),
+              child: Text('Orang Berutang'),
             ),
             selected: selectedDebtType == DebtType.receivable,
             selectedColor: AppColors.primary,
@@ -649,7 +658,7 @@ class _DebtTypeSelector extends StatelessWidget {
             labelStyle: TextStyle(
               color: selectedDebtType == DebtType.receivable ? Colors.white : AppColors.textPrimary,
               fontWeight: selectedDebtType == DebtType.receivable ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 12,
+              fontSize: 13,
             ),
             onSelected: (_) => onChanged(DebtType.receivable),
             shape: RoundedRectangleBorder(
