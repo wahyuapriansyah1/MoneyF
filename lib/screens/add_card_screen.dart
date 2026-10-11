@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
 import '../widgets/responsive_layout.dart';
+import '../widgets/app_dialog.dart';
 
 class AddCardScreen extends StatefulWidget {
   const AddCardScreen({super.key});
@@ -140,17 +141,26 @@ class _AddCardScreenState extends State<AddCardScreen> {
                   ),
                   BlackButton(
                     label: 'Simpan Kartu',
-                    onPressed: () {
+                    onPressed: () async {
                       if (_holderCtrl.text.trim().isEmpty || _numberCtrl.text.trim().isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Nama dan nomor kartu harus diisi')),
+                        await showAppAlert(
+                          context: context,
+                          type: AlertType.warning,
+                          title: 'Data Belum Lengkap',
+                          message: 'Nama pemilik dan nomor kartu harus diisi dengan lengkap.',
                         );
                         return;
                       }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Kartu berhasil disimpan')),
+                      await showAppAlert(
+                        context: context,
+                        type: AlertType.success,
+                        title: 'Kartu Disimpan',
+                        message: 'Kartu baru berhasil ditambahkan ke dompet akun Anda.',
+                        buttonText: 'Selesai',
                       );
-                      Navigator.of(context).pop();
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
                     },
                   ),
                 ],

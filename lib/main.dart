@@ -299,6 +299,7 @@ class _MainTabScreenState extends State<MainTabScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (ctx) => _AddTransactionSheet(
         onSelected: (type) {
           Navigator.of(ctx).pop();
@@ -351,59 +352,64 @@ class _AddTransactionSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 24),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 4,
-            margin: const EdgeInsets.only(bottom: 20),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(2),
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
-          ),
-          const Text(
-            'Tambah Transaksi',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+            const Text(
+              'Tambah Transaksi',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          _SheetItem(
-            icon: Icons.remove_circle_outline_rounded,
-            color: AppColors.negative,
-            bgColor: const Color(0xFFFFEBEE),
-            title: 'Pengeluaran',
-            subtitle: 'Catat pengeluaran harianmu',
-            onTap: () => onSelected(RecordType.expense),
-          ),
-          const SizedBox(height: 12),
-          _SheetItem(
-            icon: Icons.add_circle_outline_rounded,
-            color: AppColors.positive,
-            bgColor: const Color(0xFFE8F5E9),
-            title: 'Pemasukan',
-            subtitle: 'Catat pemasukanmu',
-            onTap: () => onSelected(RecordType.income),
-          ),
-          const SizedBox(height: 12),
-          _SheetItem(
-            icon: Icons.handshake_rounded,
-            color: AppColors.warning,
-            bgColor: const Color(0xFFFFF3E0),
-            title: 'Utang / Piutang',
-            subtitle: 'Catat utang atau pinjaman',
-            onTap: () => onSelected(RecordType.debt),
-          ),
-        ],
+            const SizedBox(height: 20),
+            _SheetItem(
+              icon: Icons.remove_circle_outline_rounded,
+              color: AppColors.negative,
+              bgColor: const Color(0xFFFFEBEE),
+              title: 'Pengeluaran',
+              subtitle: 'Catat pengeluaran harianmu',
+              onTap: () => onSelected(RecordType.expense),
+            ),
+            const SizedBox(height: 12),
+            _SheetItem(
+              icon: Icons.add_circle_outline_rounded,
+              color: AppColors.positive,
+              bgColor: const Color(0xFFE8F5E9),
+              title: 'Pemasukan',
+              subtitle: 'Catat pemasukanmu',
+              onTap: () => onSelected(RecordType.income),
+            ),
+            const SizedBox(height: 12),
+            _SheetItem(
+              icon: Icons.handshake_rounded,
+              color: AppColors.warning,
+              bgColor: const Color(0xFFFFF3E0),
+              title: 'Utang / Piutang',
+              subtitle: 'Catat utang atau pinjaman',
+              onTap: () => onSelected(RecordType.debt),
+            ),
+          ],
+        ),
       ),
     );
   }

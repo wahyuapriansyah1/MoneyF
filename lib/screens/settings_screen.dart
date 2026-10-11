@@ -29,7 +29,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (mounted) {
       setState(() {
         if (email != null && email.isNotEmpty) _userEmail = email;
-        if (name != null && name.isNotEmpty) {
+        if (name != null &&
+            name.isNotEmpty &&
+            name != 'Pengguna MoneyF' &&
+            name != 'Pengguna Moneyf') {
           _userName = name;
         } else if (email != null && email.isNotEmpty) {
           _userName = email.split('@').first;
@@ -144,6 +147,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFEBEE),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.logout_rounded,
+                  color: AppColors.negative,
+                  size: 26,
+                ),
+              ),
+              const SizedBox(height: 16),
               const Text(
                 'Konfirmasi Logout',
                 style: TextStyle(
@@ -152,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               const Text(
                 'Apakah kamu yakin ingin keluar dari akun ini?',
                 textAlign: TextAlign.center,
@@ -169,9 +186,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(ctx).pop(),
                       style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.grey),
+                        side: BorderSide(color: Colors.grey.shade300),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(14)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: const Text(
@@ -201,7 +218,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         backgroundColor: AppColors.negative,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(14)),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         elevation: 0,
                       ),
@@ -262,11 +279,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  void _showChangePassword() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const _ChangePasswordScreen()),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -286,77 +298,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Profile card
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 12,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 54,
-                        height: 54,
-                        decoration: BoxDecoration(
-                          color: AppColors.primarySurface,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            width: 2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _initials,
-                            style: const TextStyle(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _userName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _userEmail,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                    ],
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -381,14 +322,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       title: 'Edit Akun',
                       subtitle: 'Ubah informasi akun',
                       onTap: _showEditAccount,
-                    ),
-                    _MenuItem(
-                      icon: Icons.lock_outline_rounded,
-                      iconBg: const Color(0xFFE8F5E9),
-                      iconColor: AppColors.positive,
-                      title: 'Ubah Password',
-                      subtitle: 'Ganti password akun',
-                      onTap: _showChangePassword,
                       showDivider: false,
                     ),
                   ],
@@ -567,14 +500,14 @@ class _AccountInfoScreen extends StatelessWidget {
   final String name;
   final String email;
   final String phone;
-  final String initials;
+  final String? initials;
   final String joinDate;
 
   const _AccountInfoScreen({
     required this.name,
     required this.email,
     required this.phone,
-    required this.initials,
+    this.initials,
     required this.joinDate,
   });
 
@@ -615,14 +548,11 @@ class _AccountInfoScreen extends StatelessWidget {
                   width: 3,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  initials,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                  ),
+              child: const Center(
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 44,
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -726,14 +656,14 @@ class _EditAccountScreen extends StatefulWidget {
   final String name;
   final String email;
   final String phone;
-  final String initials;
+  final String? initials;
   final void Function(String name, String email, String phone) onSaved;
 
   const _EditAccountScreen({
     required this.name,
     required this.email,
     required this.phone,
-    required this.initials,
+    this.initials,
     required this.onSaved,
   });
 
@@ -784,87 +714,76 @@ class _EditAccountScreenState extends State<_EditAccountScreen> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
+      body: SafeArea(
         child: Column(
           children: [
-            Stack(
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        width: 3),
-                  ),
-                  child: Center(
-                    child: Text(
-                      widget.initials,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: AppColors.primarySurface,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          width: 3,
+                        ),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.person_rounded,
+                          size: 44,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 24),
+                    _EditField(label: 'Nama Lengkap', controller: _nameCtrl),
+                    const SizedBox(height: 12),
+                    _EditField(
+                        label: 'Email',
+                        controller: _emailCtrl,
+                        keyboardType: TextInputType.emailAddress),
+                    const SizedBox(height: 12),
+                    _EditField(
+                        label: 'No. HP',
+                        controller: _phoneCtrl,
+                        keyboardType: TextInputType.phone),
+                  ],
                 ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.camera_alt_rounded,
-                        size: 13, color: Colors.white),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _EditField(label: 'Nama Lengkap', controller: _nameCtrl),
-            const SizedBox(height: 12),
-            _EditField(
-                label: 'Email',
-                controller: _emailCtrl,
-                keyboardType: TextInputType.emailAddress),
-            const SizedBox(height: 12),
-            _EditField(
-                label: 'No. HP',
-                controller: _phoneCtrl,
-                keyboardType: TextInputType.phone),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  widget.onSaved(
-                    _nameCtrl.text.trim(),
-                    _emailCtrl.text.trim(),
-                    _phoneCtrl.text.trim(),
-                  );
-                  Navigator.of(context).pop();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                ),
-                child: const Text('Simpan',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w700)),
               ),
             ),
-            const SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    widget.onSaved(
+                      _nameCtrl.text.trim(),
+                      _emailCtrl.text.trim(),
+                      _phoneCtrl.text.trim(),
+                    );
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                  ),
+                  child: const Text('Simpan',
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w700)),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -923,189 +842,3 @@ class _EditField extends StatelessWidget {
   }
 }
 
-class _ChangePasswordScreen extends StatefulWidget {
-  const _ChangePasswordScreen();
-
-  @override
-  State<_ChangePasswordScreen> createState() => _ChangePasswordScreenState();
-}
-
-class _ChangePasswordScreenState extends State<_ChangePasswordScreen> {
-  final _oldCtrl = TextEditingController();
-  final _newCtrl = TextEditingController();
-  final _confirmCtrl = TextEditingController();
-  bool _oldObscure = true;
-  bool _newObscure = true;
-  bool _confirmObscure = true;
-
-  @override
-  void dispose() {
-    _oldCtrl.dispose();
-    _newCtrl.dispose();
-    _confirmCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.bgScreen,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.textPrimary, size: 18),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Ubah Password',
-          style: TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _PasswordField(
-              label: 'Password Lama',
-              hint: 'Masukkan password lama',
-              controller: _oldCtrl,
-              obscure: _oldObscure,
-              onToggle: () => setState(() => _oldObscure = !_oldObscure),
-            ),
-            const SizedBox(height: 12),
-            _PasswordField(
-              label: 'Password Baru',
-              hint: 'Masukkan password baru',
-              controller: _newCtrl,
-              obscure: _newObscure,
-              onToggle: () => setState(() => _newObscure = !_newObscure),
-            ),
-            const SizedBox(height: 12),
-            _PasswordField(
-              label: 'Konfirmasi Password Baru',
-              hint: 'Konfirmasi password baru',
-              controller: _confirmCtrl,
-              obscure: _confirmObscure,
-              onToggle: () =>
-                  setState(() => _confirmObscure = !_confirmObscure),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Password berhasil diubah!'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                  Navigator.of(context).pop();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  elevation: 0,
-                ),
-                child: const Text('Simpan',
-                    style: TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w700)),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PasswordField extends StatelessWidget {
-  final String label;
-  final String hint;
-  final TextEditingController controller;
-  final bool obscure;
-  final VoidCallback onToggle;
-
-  const _PasswordField({
-    required this.label,
-    required this.hint,
-    required this.controller,
-    required this.obscure,
-    required this.onToggle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.lock_outline_rounded,
-                  size: 18, color: AppColors.textSecondary),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  obscureText: obscure,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    hintText: hint,
-                    hintStyle: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: onToggle,
-                child: Icon(
-                  obscure
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  size: 18,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}

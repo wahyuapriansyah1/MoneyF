@@ -4,6 +4,7 @@ import '../theme.dart';
 import '../models.dart';
 import '../state/finance_state.dart';
 import '../widgets/responsive_layout.dart';
+import '../widgets/app_dialog.dart';
 
 class AddRecordScreen extends StatefulWidget {
   final RecordType initialType;
@@ -88,33 +89,104 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     if (!_isEditing) return;
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Catatan?'),
-        content: Text('Apakah Anda yakin ingin menghapus catatan "${widget.recordToEdit!.title}"?'),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Batal', style: TextStyle(color: AppColors.textSecondary)),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 56,
+                height: 56,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFEBEE),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.delete_outline_rounded,
+                  color: AppColors.negative,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Hapus Catatan?',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Apakah Anda yakin ingin menghapus catatan "${widget.recordToEdit!.title}"? Tindakan ini tidak dapat dibatalkan.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      child: const Text(
+                        'Batal',
+                        style: TextStyle(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        final state = FinanceProvider.of(context);
+                        state.deleteRecord(widget.recordToEdit!.id);
+                        Navigator.of(context).pop();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Catatan "${widget.recordToEdit!.title}" berhasil dihapus',
+                            ),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.negative,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Hapus',
+                        style: TextStyle(fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              final state = FinanceProvider.of(context);
-              state.deleteRecord(widget.recordToEdit!.id);
-              Navigator.of(context).pop();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Catatan "${widget.recordToEdit!.title}" berhasil dihapus')),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            child: const Text('Hapus'),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -132,7 +204,7 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     return buffer.toString();
   }
 
-  void _submitData() {
+  Future<void> _submitData() async {
     var title = _titleController.text.trim();
     final rawText = _amountController.text.trim();
     final person = _personController.text.trim();
@@ -147,15 +219,21 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
     final amount = double.tryParse(digitsOnly);
 
     if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Judul transaksi tidak boleh kosong')),
+      await showAppAlert(
+        context: context,
+        type: AlertType.warning,
+        title: 'Perhatian',
+        message: 'Judul transaksi tidak boleh kosong. Silakan isi judul atau keterangan transaksi.',
       );
       return;
     }
 
     if (amount == null || amount <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Masukkan nominal angka yang valid')),
+      await showAppAlert(
+        context: context,
+        type: AlertType.warning,
+        title: 'Perhatian',
+        message: 'Masukkan nominal angka yang valid lebih dari 0.',
       );
       return;
     }
@@ -177,9 +255,16 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
 
       state.updateRecord(updated);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Catatan berhasil diperbarui!')),
+      await showAppAlert(
+        context: context,
+        type: AlertType.success,
+        title: 'Berhasil Diperbarui',
+        message: 'Catatan transaksi "$title" berhasil diperbarui.',
+        buttonText: 'Selesai',
       );
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } else {
       final newRecord = FinancialRecord(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -197,20 +282,23 @@ class _AddRecordScreenState extends State<AddRecordScreen> {
 
       state.addRecord(newRecord);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _selectedType == RecordType.income
-                ? 'Pemasukan berhasil ditambahkan!'
-                : _selectedType == RecordType.expense
-                    ? 'Pengeluaran berhasil ditambahkan!'
-                    : 'Utang berhasil ditambahkan!',
-          ),
-        ),
-      );
-    }
+      final typeLabel = _selectedType == RecordType.income
+          ? 'Pemasukan'
+          : _selectedType == RecordType.expense
+              ? 'Pengeluaran'
+              : (_debtType == DebtType.payable ? 'Utang' : 'Piutang');
 
-    Navigator.of(context).pop();
+      await showAppAlert(
+        context: context,
+        type: AlertType.success,
+        title: 'Berhasil Ditambahkan',
+        message: 'Catatan $typeLabel "$title" berhasil disimpan.',
+        buttonText: 'Selesai',
+      );
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   @override

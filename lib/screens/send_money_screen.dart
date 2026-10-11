@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme.dart';
 import '../models.dart';
 import '../widgets/responsive_layout.dart';
+import '../widgets/app_dialog.dart';
 import 'add_card_screen.dart';
 
 class SendMoneyScreen extends StatefulWidget {
@@ -81,10 +82,27 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                   const SizedBox(height: 20),
                   BlackButton(
                     label: 'Kirim Sekarang',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Berhasil mengirim Rp ${_formatRupiah(amount)} ke ${contact.name}')),
+                    onPressed: () async {
+                      final numVal = int.tryParse(amount) ?? 0;
+                      if (numVal <= 0) {
+                        await showAppAlert(
+                          context: context,
+                          type: AlertType.warning,
+                          title: 'Nominal Kosong',
+                          message: 'Masukkan jumlah uang yang ingin Anda kirim.',
+                        );
+                        return;
+                      }
+                      await showAppAlert(
+                        context: context,
+                        type: AlertType.success,
+                        title: 'Kirim Uang Berhasil',
+                        message: 'Berhasil mengirim Rp ${_formatRupiah(amount)} ke ${contact.name}.',
+                        buttonText: 'Selesai',
                       );
+                      if (mounted) {
+                        Navigator.of(context).pop();
+                      }
                     },
                   ),
                 ],

@@ -147,15 +147,46 @@ class _HomeScreenState extends State<HomeScreen> {
                           ],
                         ),
                         child: state.records.isEmpty
-                            ? const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 32),
+                            ? Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 36, horizontal: 20),
                                 child: Center(
-                                  child: Text(
-                                    'Belum ada transaksi',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: AppColors.textSecondary,
-                                    ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 52,
+                                        height: 52,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primarySurface,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.receipt_long_outlined,
+                                          size: 26,
+                                          color: AppColors.primary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      const Text(
+                                        'Belum Ada Transaksi',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      const Text(
+                                        'Mulai catat pengeluaran, pemasukan, atau utang pertamamu dengan tombol + di bawah.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                          height: 1.4,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               )

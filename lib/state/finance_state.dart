@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models.dart';
 
 class FinanceState extends ChangeNotifier {
-  final List<FinancialRecord> _records = List.from(initialMockRecords);
+  final List<FinancialRecord> _records = [];
   String _currency = 'IDR'; // 'IDR' or 'USD'
 
   List<FinancialRecord> get records => List.unmodifiable(_records);
@@ -110,7 +110,6 @@ class FinanceState extends ChangeNotifier {
   // Clear data
   void resetData() {
     _records.clear();
-    _records.addAll(initialMockRecords);
     notifyListeners();
   }
 }

@@ -120,7 +120,8 @@ class AuthService {
       token ??= responseData['data']?.toString() ?? 'auth_session_token';
 
       final userObj = userData ?? (responseData['user'] is Map ? responseData['user'] as Map<String, dynamic> : null);
-      final userName = userObj?['name']?.toString() ?? 'Pengguna MoneyF';
+      final userName = userObj?['name']?.toString() ??
+          (fallbackEmail.contains('@') ? fallbackEmail.split('@').first : 'Wahan');
 
       await saveToken(
         token,
